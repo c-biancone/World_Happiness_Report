@@ -42,6 +42,7 @@
                 "esri/widgets/TimeSlider",
                 "esri/widgets/Legend",
                 "esri/widgets/Expand",
+                "esri/Color",
                 "esri/PopupTemplate",
                 "esri/popup/content/CustomContent",
                 "esri/widgets/Search",
@@ -56,6 +57,7 @@
                 TimeSlider,
                 Legend,
                 Expand,
+                Color,
                 PopupTemplate,
                 CustomContent,
                 Search,
@@ -68,11 +70,38 @@
             esriConfig.apiKey = "AAPK926a4882e21249c394acbaf7f319bbddtAWHpk9n2nNITsQLttXhPH59KEffP1zRBXjpBlKGvQDFzQKMOqt8OaZWYlALA3BU";
 
             const popupHappiness = {
-                title: `<b>Happiness Index:</b> {Index_}`,
-                content: `<b>{Country}</b> on <dyn type="date" format="yyyy"/>{Year}</dyn>`,
+                title: `<b>{Country}</b> {Index_}`,
+                content: [
+                    {
+                        type: "text",
+                        text: `<b>Happiness index:</b> <div font-size="2em">{Index_}</div> on <dyn type="date" format="yyyy"/>{Year}</dyn>`
+                    },
+                    {
+                        type: "media",
+                        title: "Factors contributing to happiness index",
+                        mediaInfos: [
+                            {
+                                type: "column-chart",
+                                title: `<b>Normalized against data range</b>`,
+                                caption: "Data from Gallup World Survey",
+                                value: {
+                                    fields: [
+                                        "norm_log_GDP_cap",
+                                        "social_support",
+                                        "life_expectancy_norm",
+                                        "freedom",
+                                        "generosity_offset",
+                                        "corruption"
+                                    ]
+                                },
+                                colors: [new Color("#5865F2")]
+                            }
+                        ]
+                    }
+                    ],
                 fieldInfos: [
                     {
-                        fieldName: "log_GDP_cap",
+                        fieldName: "norm_log_GDP_cap",
                         visible: false,
                         label: "Norm ln(GDP/capita)",
                         format: {
@@ -183,11 +212,16 @@
 
             view.ui.add("titleDiv", "top-center");
 
-            view.ui.add(new Expand({ content: new Legend({ view }), view }), "top-left");
+            view.ui.add(new Expand({
+                content: new Legend({
+                    view
+                    }),
+                view }), "top-left");
 
             // time slider widget initialization
             const timeSlider = new TimeSlider({
                 container: "timeSlider",
+                label: "World Happiness Index 2012-2023",
                 mode: "time-window",
                 view: view,
                 stops: {
@@ -195,13 +229,34 @@
                         value: 1,
                         unit: "years"
                     }
+                },
+                labelFormatFunction: (value, type, element, layout) => {
+                    const normal = new Intl.DateTimeFormat('en-us');
+                    switch (type) {
+                        case "min":
+                            element.setAttribute("style", "color: #5865F2;");
+                            element.innerText = "2012"
+                            break;
+                        case "max":
+                            element.setAttribute("style", "color: #5865F2;");
+                            element.innerText = "2023"
+                            break;
+                        case "extent":
+                            element.parentNode.setAttribute("style", "width:0px");
+                            break;
+                    }
                 }
             });
 
             // Time slider all the time
             view.whenLayerView(happinessLayer).then((lv) => {
                 // around up the full time extent to full year
-                timeSlider.fullTimeExtent = happinessLayer.timeInfo.fullTimeExtent.expandTo("years");
+                const start = new Date(2012,2,19);
+                const end = new Date(2024,2,19);
+                timeSlider.fullTimeExtent = {
+                    start: start,
+                    end: end    //happinessLayer.timeInfo.fullTimeExtent.end
+                }
                 timeSlider.stops = {
                     interval: happinessLayer.timeInfo.interval
                 };
@@ -238,8 +293,6 @@
         <div id="titleText"> World Happiness Report 2012-2023 </div>
     </div>
     <div id="timeSlider"></div>
-    <span id="layerToggle" class="esri-widget"> <label for="streetsLayer"></label><input type="checkbox" id="streetsLayer" checked /> Transportation </span>
-
 </body>
 
 </html>
