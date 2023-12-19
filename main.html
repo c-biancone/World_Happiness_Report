@@ -13,18 +13,30 @@
             height: 100%;
             width: 100%;
         }
-
         #timeSlider {
             position: absolute;
             left: 20%;
             right: 20%;
             bottom: 20px;
         }
-
+        #titleText {
+            font-size: 1.5em;
+            font-weight: 30;
+            padding-bottom: 10px;
+        }
         #titleDiv {
-            padding: 10px;
+            position: fixed;
+            width: fit-content;
+            top: 15px;
+            left: 65px;
+            padding: 15px;
             font-weight: 36;
             text-align: center;
+        }
+        #info {
+            width: 260px;
+            padding: 15px;
+            text-align: left;
         }
     </style>
 
@@ -70,20 +82,21 @@
             esriConfig.apiKey = "AAPK926a4882e21249c394acbaf7f319bbddtAWHpk9n2nNITsQLttXhPH59KEffP1zRBXjpBlKGvQDFzQKMOqt8OaZWYlALA3BU";
 
             const popupHappiness = {
-                title: `<b>{Country}</b> {Index_}`,
+                title: `<b>{Country}</b>`,
                 content: [
                     {
                         type: "text",
-                        text: `<b>Happiness index:</b> <div font-size="2em">{Index_}</div> on <dyn type="date" format="yyyy"/>{Year}</dyn>`
+                        text: `<b>Happiness index: <span style="font-size: 200%; ">{Index_}</span> in {Year}</b>`
                     },
                     {
                         type: "media",
                         title: "Factors contributing to happiness index",
                         mediaInfos: [
                             {
+                                // docked popup bar chart
                                 type: "column-chart",
                                 title: `<b>Normalized against data range</b>`,
-                                caption: "Data from Gallup World Survey",
+                                caption: "Data from Gallup World Poll",
                                 value: {
                                     fields: [
                                         "norm_log_GDP_cap",
@@ -160,6 +173,14 @@
                             places: 3,
                             digitSeparator: true
                         }
+                    },
+                    {
+                        fieldName: "Year",
+                        visible: false,
+                        label: "Year",
+                        format: {
+                            dateFormat: "year"
+                        }
                     }
                 ]
             }
@@ -217,13 +238,30 @@
                 }
             });
 
-            view.ui.add("titleDiv", "top-center");
+            // display title
+            view.ui.add("titleDiv");
 
+            // display expanding legend
             view.ui.add(new Expand({
                 content: new Legend({
                     view
                     }),
-                view }), "top-left");
+                view }), "top-left", index = 3);
+
+            // display expanded info
+            const expandInfo = new Expand({
+                expandTooltip: "Open for info",
+                collapseTooltip: "Close info",
+                expanded: true,
+                view: view,
+                content: document.getElementById("info")
+            });
+
+            view.ui.add(expandInfo, {
+                position: "top-left",
+                index: 4
+            });
+
 
             // time slider widget initialization
             const timeSlider = new TimeSlider({
@@ -259,7 +297,7 @@
             view.whenLayerView(happinessLayer).then((lv) => {
                 // around up the full time extent to full year
                 const start = new Date(2012,2,19);
-                const end = new Date(2024,2,19);
+                const end = new Date(2023,3,19);
                 timeSlider.fullTimeExtent = {
                     start: start,
                     end: end    //happinessLayer.timeInfo.fullTimeExtent.end
@@ -297,7 +335,12 @@
 <body>
     <div id="viewDiv"></div>
     <div id="titleDiv" class="esri-widget">
-        <div id="titleText"> World Happiness Report 2012-2023 </div>
+        <div id="titleText"> <p>World Happiness</p> <p>Report 2012-2023</p> </div>
+    </div>
+    <div id="info" class="esri-widget">
+        <h3>Click on a country to see how happy it is for the year shown.</h3>
+        <h4>Use the time slider to see global happiness index changes.</h4>
+        <h5><em>Website designed by Chris Biancone</em></h5>
     </div>
     <div id="timeSlider"></div>
 </body>
