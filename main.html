@@ -2,8 +2,10 @@
 <html>
 <head>
     <meta charset="utf-8" />
+    <title>World Happiness Index 2012-2023 3D Visualization</title>
+    <meta name="author" content="Chris Biancone" />
+    <meta name="keywords" content="ESRI, ArcGIS, JavaScript, Gallup, World Happiness Report" />
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Global Happiness Index 2012-2023</title>
     <style>
         html,
         body,
@@ -51,6 +53,7 @@
                 "esri/Basemap",
                 "esri/views/SceneView",
                 "esri/layers/FeatureLayer",
+                "esri/layers/VectorTileLayer",
                 "esri/widgets/TimeSlider",
                 "esri/widgets/Legend",
                 "esri/widgets/Expand",
@@ -66,6 +69,7 @@
                 Map, Basemap,
                 SceneView,
                 FeatureLayer,
+                VectorTileLayer,
                 TimeSlider,
                 Legend,
                 Expand,
@@ -186,7 +190,8 @@
             }
 
             const happinessLayer = new FeatureLayer({
-                url:"https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/World_Happiness_Report_2012_to_2023/FeatureServer",
+                url:"https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/World_Happiness_Report_2012_to_2023/FeatureServer", // deprecated symbology
+                // url:"https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/World_Happiness_Index_2012_to_2023/FeatureServer",  // updated symbology.
                 timeInfo: {
                     startField: "time",
                     interval: {
